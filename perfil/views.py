@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Conta
+from .models import Conta, Categoria
 from django.contrib import messages
 from django.contrib.messages import constants
 
@@ -10,10 +10,12 @@ def home(request):
 
 def gerenciar(request):
     contas = Conta.objects.all()
+    categorias = Categoria.objects.all()
     total_conta = 0
     for conta in contas:
         total_conta += conta.valor
-    return render(request,'gerenciar.html', {'contas':contas, 'total_conta':total_conta})
+    return render(request,'gerenciar.html', {'contas':contas, 'total_conta':total_conta, 'categorias':categorias})
+
 
 def cadastrar_banco(request):
     apelido = request.POST.get('apelido')
@@ -24,6 +26,10 @@ def cadastrar_banco(request):
 
     if len(apelido.strip()) == 0 or len(valor.strip()) == 0:
         messages.add_message(request, constants.ERROR, 'Preencha todos os campos')
+        return redirect('/perfil/gerenciar/')
+    
+    if not apelido.isascii():
+        messages.add_message(request, constants.ERROR, 'Digite informações válidas nos campos abaixo')
         return redirect('/perfil/gerenciar/')
 
     conta = Conta(
@@ -46,3 +52,27 @@ def deletar_banco(request, id):
     messages.add_message(request, constants.INFO, 'Conta removida com sucesso')
     return redirect('/perfil/gerenciar/')
 
+def cadastrar_categoria(request):
+    nome = request.POST.get('categoria')
+    essencial = bool(request.POST.get('essencial'))
+
+    if not nome.isalpha():
+        messages.add_message(request, constants.ERROR, 'Digite informações válidas no campo da Categoria')
+        return redirect('/perfil/gerenciar/')
+        
+    categoria = Categoria(
+        categoria=nome.title(),
+        essencial=essencial
+    )
+
+    categoria.save()
+
+    messages.add_message(request, constants.SUCCESS, 'Categoria cadastrada com sucesso')
+    return redirect('/perfil/gerenciar/')
+
+def update_categoria(request, id):
+    categoria = Categoria.objects.get(id=id)
+    categoria.essencial = not categoria.essencial
+    categoria.save()
+
+    return redirect('/perfil/gerenciar/')
