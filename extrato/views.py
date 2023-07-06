@@ -1,16 +1,16 @@
 from django.shortcuts import render, redirect
 from perfil.models import Categoria, Conta
-from models import Valores
+from .models import Valores
 from django.contrib.messages import constants
 from django.contrib import messages
 
     
 def novo_valor(request):
-    if request.method == "GET":
+    if request.method == 'GET':
         contas = Conta.objects.all()
         categorias = Categoria.objects.all() 
         return render(request, 'novo_valor.html', {'contas': contas, 'categorias': categorias})
-    elif request.method == "POST":
+    elif request.method == 'POST':
         valor = request.POST.get('valor')
         categoria = request.POST.get('categoria')
         descricao = request.POST.get('descricao')
