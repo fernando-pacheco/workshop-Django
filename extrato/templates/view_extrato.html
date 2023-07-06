@@ -50,7 +50,7 @@
             </div>
             </form>
             <div class="col-md-2">
-                <a href="" class="botao-secundario">Exportar extrato</a>
+                <a href="{% url 'exportar_pdf' %}" class="botao-secundario">Exportar extrato</a>
             </div>
             <div class="col-md-2">
             </div>
@@ -64,39 +64,7 @@
         </div>
         <br>
         <br>
-
-
-        <div class="card">
-            
-                <table>
-                    <tr>
-                        <th>Conta</th>
-                        <th>Categoria</th>
-                        <th>Data</th>
-                        <th>Tipo</th>
-                        <th>Valor</th>
-                        
-                    </tr>
-                    {% for valor in valores %}
-                        <tr class="linha">
-                            <td width="10%">{{valor.conta}}</td>
-                            <td>{{valor.categoria}}</td>
-                            <td>{{valor.data}}</td>
-                            <td>
-                            {% if valor.tipo == 'S'%}
-                                <img src="{% static 'perfil/img/saidas.png' %}">
-                            {% else %}
-                                <img src="{% static 'perfil/img/entradas.png' %}">
-                            {% endif %}
-                            
-                            </td>
-                            <td>R$ {{valor.valor}}</td>
-                            
-                        </tr>
-                    {% endfor %}
-
-                </table>
-            
+        {% include 'partials/extrato.html' %}
         </div>
     </div>
 {% endblock %}

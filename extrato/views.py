@@ -1,11 +1,15 @@
+import os
+from django.conf import settings
 from django.shortcuts import render, redirect
 from perfil.models import Categoria, Conta
 from .models import Valores
 from django.contrib.messages import constants
 from django.contrib import messages
 from datetime import datetime
-from .forms import PeriodForm
-
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from io import BytesIO
+from django.http import FileResponse
     
 def novo_valor(request):
     if request.method == 'GET':
@@ -68,3 +72,16 @@ def view_extrato(request):
 
 #     return render(request, 'template.html', {'form': form})
 
+def exportar_pdf(request):
+    valores = Valores.objects.filter(data__month=datetime.now().month)
+    contas = Conta.objects.all()
+    categorias = Categoria.objects.all()
+    
+    path_output = BytesIO()
+
+    template_render = render_to_string('partials/extrato.html', {'valores': valores, 'contas': contas, 'categorias': categorias})
+    HTML(string=template_render).write_pdf(path_output)
+
+    path_output.seek(0)
+    
+    return FileResponse(path_output, filename="extrato.pdf")
