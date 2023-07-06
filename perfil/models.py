@@ -11,7 +11,7 @@ class Categoria(models.Model):
     
 
 class Conta(models.Model):
-    bank_choices = (
+    banco_choices = (
         ('NU', 'Nubank'),
         ('CE', 'Caixa Econômica'),
         ('ITU', 'Itaú Unibanco'),
@@ -27,10 +27,10 @@ class Conta(models.Model):
     )
 
     apelido = models.CharField(max_length=50)
-    bank = models.CharField(max_length=3,choices=bank_choices)
+    banco = models.CharField(max_length=3,choices=banco_choices)
     tipo = models.CharField(max_length=2, choices=tipo_choices)
     valor = models.FloatField()
-    icon = models.ImageField(upload_to='icones')
+    icone = models.ImageField(upload_to='icones')
 
     def __str__(self):
         return self.apelido
