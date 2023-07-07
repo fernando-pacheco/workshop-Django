@@ -22,6 +22,7 @@ class Categoria(models.Model):
             return int((self.total_gasto() * 100) / self.valor_planejamento)
         except:
             return 0
+        
     
 
 class Conta(models.Model):

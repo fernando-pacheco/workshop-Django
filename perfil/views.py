@@ -1,17 +1,36 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
 from .models import Conta, Categoria
 from django.contrib import messages
 from django.contrib.messages import constants
-from .utils import calcula_total
-from django.db.models import Sum
+from .utils import calcula_total, calcula_equilibrio_financeiro
 from extrato.models import Valores
+from datetime import datetime
+
 
 
 def home(request):
     contas = Conta.objects.all()
+    valores = Valores.objects.filter(data__month=datetime.now().month)
+    entradas = valores.filter(tipo="E")
+    saidas = valores.filter(tipo="S")
+
+    total_entradas = calcula_total(entradas, 'valor')
+    total_saidas = calcula_total(saidas, 'valor')
+    total_gastos = total_saidas + total_entradas
+    percentual_gastos_essenciais, percentual_gastos_nao_essenciais = calcula_equilibrio_financeiro()  
     total_conta = calcula_total(contas,'valor')
-    return render(request,'home.html', {'contas':contas, 'total_conta':total_conta,})
+    livre = total_conta - total_gastos
+
+    return render(request,'home.html', {
+        'contas':contas, 
+        'total_conta':total_conta, 
+        'total_entradas':total_entradas, 
+        'total_saidas':total_saidas,
+        'percentual_gastos_essenciais': round(percentual_gastos_essenciais), 
+        'percentual_gastos_nao_essenciais': round(percentual_gastos_nao_essenciais),
+        'total_gastos':total_gastos,
+        'livre':livre,
+        })
 
 def gerenciar(request):
     contas = Conta.objects.all()
