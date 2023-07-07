@@ -5,6 +5,7 @@ from django.contrib.messages import constants
 from .utils import calcula_total, calcula_equilibrio_financeiro
 from extrato.models import Valores
 from datetime import datetime
+from contas.views import context_ver_contas
 
 
 
@@ -21,6 +22,10 @@ def home(request):
     total_conta = calcula_total(contas,'valor')
     livre = total_conta - total_gastos
 
+    retorno_ver_contas = context_ver_contas()
+    contagem_proximas = retorno_ver_contas['contagem_proximas']
+    contagem_contas_vencidas = retorno_ver_contas['contagem_contas_vencidas']
+
     return render(request,'home.html', {
         'contas':contas, 
         'total_conta':total_conta, 
@@ -30,6 +35,8 @@ def home(request):
         'percentual_gastos_nao_essenciais': round(percentual_gastos_nao_essenciais),
         'total_gastos':total_gastos,
         'livre':livre,
+        'contagem_proximas':contagem_proximas,
+        'contagem_contas_vencidas':contagem_contas_vencidas,
         })
 
 def gerenciar(request):

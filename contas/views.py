@@ -32,6 +32,10 @@ def definir_contas(request):
     
 
 def ver_contas(request):
+    context = context_ver_contas()
+    return render(request, 'ver_contas.html', context)
+
+def context_ver_contas():
     MES_ATUAL = datetime.now().month
     DIA_ATUAL = datetime.now().day
     
@@ -41,14 +45,14 @@ def ver_contas(request):
     contas_proximas_vencimento = contas.filter(dia_pagamento__lte = DIA_ATUAL + 5).filter(dia_pagamento__gte=DIA_ATUAL).exclude(id__in=contas_pagas)
     restantes = contas.exclude(id__in=contas_vencidas).exclude(id__in=contas_pagas).exclude(id__in=contas_proximas_vencimento)
 
-    #contagem
-    contagem_proximas = len(contas.filter(dia_pagamento__lte = DIA_ATUAL + 5).filter(dia_pagamento__gte=DIA_ATUAL).exclude(id__in=contas_pagas))
-    contagem_contas_vencidas = len(contas.filter(dia_pagamento__lt=DIA_ATUAL).exclude(id__in=contas_pagas))
+    # Contagem
+    contagem_proximas = len(contas_proximas_vencimento)
+    contagem_contas_vencidas = len(contas_vencidas)
 
-    return render(request, 'ver_contas.html', {
+    return {
         'contas_vencidas': contas_vencidas, 
         'contas_proximas_vencimento': contas_proximas_vencimento, 
         'restantes': restantes,
-        'contagem_proximas':contagem_proximas,
-        'contagem_contas_vencidas':contagem_contas_vencidas,
-        })
+        'contagem_proximas': contagem_proximas,
+        'contagem_contas_vencidas': contagem_contas_vencidas,
+    }
