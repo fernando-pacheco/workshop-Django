@@ -1,15 +1,43 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
 from .models import Conta, Categoria
 from django.contrib import messages
 from django.contrib.messages import constants
-from .utils import calcula_total
+from .utils import calcula_total, calcula_equilibrio_financeiro
+from extrato.models import Valores
+from datetime import datetime
+from contas.views import context_ver_contas
+
 
 
 def home(request):
     contas = Conta.objects.all()
+    valores = Valores.objects.filter(data__month=datetime.now().month)
+    entradas = valores.filter(tipo="E")
+    saidas = valores.filter(tipo="S")
+
+    total_entradas = calcula_total(entradas, 'valor')
+    total_saidas = calcula_total(saidas, 'valor')
+    total_gastos = total_saidas + total_entradas
+    percentual_gastos_essenciais, percentual_gastos_nao_essenciais = calcula_equilibrio_financeiro()  
     total_conta = calcula_total(contas,'valor')
-    return render(request,'home.html', {'contas':contas, 'total_conta':total_conta,})
+    livre = total_conta - total_gastos
+
+    retorno_ver_contas = context_ver_contas()
+    contagem_proximas = retorno_ver_contas['contagem_proximas']
+    contagem_contas_vencidas = retorno_ver_contas['contagem_contas_vencidas']
+
+    return render(request,'home.html', {
+        'contas':contas, 
+        'total_conta':total_conta, 
+        'total_entradas':total_entradas, 
+        'total_saidas':total_saidas,
+        'percentual_gastos_essenciais': round(percentual_gastos_essenciais), 
+        'percentual_gastos_nao_essenciais': round(percentual_gastos_nao_essenciais),
+        'total_gastos':total_gastos,
+        'livre':livre,
+        'contagem_proximas':contagem_proximas,
+        'contagem_contas_vencidas':contagem_contas_vencidas,
+        })
 
 def gerenciar(request):
     contas = Conta.objects.all()
@@ -77,3 +105,17 @@ def update_categoria(request, id):
     categoria.save()
 
     return redirect('/perfil/gerenciar/')
+
+def dashboard(request):
+    dados = {}
+    categorias = Categoria.objects.all()
+
+    for categoria in categorias:
+        total = 0
+        valores = Valores.objects.filter(categoria=categoria)
+        for v in valores:
+            total += v.valor
+
+        dados[categoria.categoria] = total
+
+    return render(request, 'dashboard.html', {'labels': list(dados.keys()), 'values': list(dados.values())})
