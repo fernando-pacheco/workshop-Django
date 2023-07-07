@@ -85,6 +85,11 @@ def dashboard(request):
     categorias = Categoria.objects.all()
 
     for categoria in categorias:
-        dados[categoria.categoria] = Valores.objects.filter(categoria=categoria).aggregate(Sum('valor'))['valor__sum']
+        total = 0
+        valores = Valores.objects.filter(categoria=categoria)
+        for v in valores:
+            total += v.valor
+
+        dados[categoria.categoria] = total
 
     return render(request, 'dashboard.html', {'labels': list(dados.keys()), 'values': list(dados.values())})
